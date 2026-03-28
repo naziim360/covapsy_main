@@ -19,7 +19,6 @@ from vehicle import Driver  # type: ignore
 # ============================================================================
 # CONSTANTES
 # ============================================================================
-VITESSE_MIN = 0.0
 VITESSE_MAX_M_S = 28.0 / 3.6  # 28 km/h → 7.78 m/s
 VITESSE_MIN_M_S = 0.5  # Vitesse minimale pour éviter l'arrêt complet
 MAXANGLE_DEGRE = 16.0  # Angle de braquage maximal (degrés)
