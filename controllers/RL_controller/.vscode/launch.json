@@ -1,0 +1,13 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Webots Extern Controller",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/my_controller.py",
+      "console": "integratedTerminal",
+      "envFile": "${workspaceFolder}/.env"
+    }
+  ]
+}
