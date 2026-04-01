@@ -6,10 +6,11 @@ EXTERNPROTO "../protos/TT02_2023b.proto"
 EXTERNPROTO "../protos/sparringpartner_car_0.proto"
 
 WorldInfo {
+  basicTimeStep 64
 }
 Viewpoint {
-  orientation 0.5071583115554413 -0.07639475639387501 -0.8584604173843745 3.542704592723026
-  position 16.878595751917196 -8.395251345160125 33.44826201705384
+  orientation -0.5266968674428253 0.576368639117555 0.6248116529544664 1.9421435662725026
+  position -0.24229016159298394 -7.51379489249069 36.13952920546941
   exposure 3
   follow "sol_piste"
 }
@@ -74,8 +75,8 @@ Group {
       }
     }
     Solid {
-      translation 5.48 -0.749999 0.1
-      rotation 0 0 1 -1.5707953071795862
+      translation 5.72 -0.750002 0.1
+      rotation 0 0 -1 1.5708
       children [
         Shape {
           appearance PBRAppearance {
@@ -88,6 +89,25 @@ Group {
         }
       ]
       name "droit_50cm_rouge"
+      boundingObject Box {
+        size 0.5 0.1 0.2
+      }
+    }
+    Solid {
+      translation 5.72 -0.750002 0.1
+      rotation 0 0 -1 1.5708
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 1 0 0
+            metalness 0
+          }
+          geometry Box {
+            size 0.5 0.1 0.2
+          }
+        }
+      ]
+      name "droit_50cm_rouge(3)"
       boundingObject Box {
         size 0.5 0.1 0.2
       }
@@ -128,6 +148,63 @@ Group {
       name "droit_1m_rouge"
       boundingObject Box {
         size 1 0.1 0.2
+      }
+    }
+    Solid {
+      translation 1.5 0.039999 0.1
+      rotation 0 0 1 -1.5707953071795862
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 1 0 0
+            metalness 0
+          }
+          geometry Box {
+            size 1 0.1 0.2
+          }
+        }
+      ]
+      name "droit_1m_rouge(1)"
+      boundingObject Box {
+        size 1 0.1 0.2
+      }
+    }
+    Solid {
+      translation 1.5 1.04 0.1
+      rotation 0 0 1 -1.5707953071795862
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 1 0 0
+            metalness 0
+          }
+          geometry Box {
+            size 1 0.1 0.2
+          }
+        }
+      ]
+      name "droit_1m_rouge(2)"
+      boundingObject Box {
+        size 1 0.1 0.2
+      }
+    }
+    Solid {
+      translation 5.72 -0.750002 0.1
+      rotation 0 0 -1 1.5708
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 1 0 0
+            metalness 0
+          }
+          geometry Box {
+            size 0.5 0.1 0.2
+          }
+        }
+      ]
+      name "droit_50cm_rouge(4)"
+      boundingObject Box {
+        size 0.5 0.1 0.2
       }
     }
   ]
@@ -373,33 +450,6 @@ Group {
       }
     }
     Solid {
-      translation 2 1.5 0.185
-      rotation 0 0 1 -5.307179586466759e-06
-      children [
-        Shape {
-          appearance Appearance {
-            material Material {
-              ambientIntensity 0.5
-              diffuseColor 0.9 0 0
-              emissiveColor 0.9 0 0
-              specularColor 0.9 0 0
-            }
-          }
-          geometry Mesh {
-            url [
-              "ImageToStl_virage.obj"
-            ]
-          }
-        }
-      ]
-      name "virage_vert(34)"
-      boundingObject Mesh {
-        url [
-          "ImageToStl_virage.obj"
-        ]
-      }
-    }
-    Solid {
       translation -4.5 -3 0.185
       rotation 0 0 1 -5.307179586466759e-06
       children [
@@ -427,7 +477,7 @@ Group {
       }
     }
     Solid {
-      translation -2 -0.500004 0.185
+      translation -2 -0.460004 0.185
       rotation 0 0 1 -5.307179586466759e-06
       children [
         Shape {
@@ -481,7 +531,7 @@ Group {
       }
     }
     Solid {
-      translation 2 -0.509999 0.185
+      translation 1 -0.459999 0.185
       rotation 0 0 1 1.57079
       children [
         Shape {
@@ -717,33 +767,6 @@ Group {
         }
       ]
       name "virage_vert(24)"
-      boundingObject Mesh {
-        url [
-          "ImageToStl_virage.obj"
-        ]
-      }
-    }
-    Solid {
-      translation 2 0.5 0.185
-      rotation 0 0 1 3.14158
-      children [
-        Shape {
-          appearance Appearance {
-            material Material {
-              ambientIntensity 0.5
-              diffuseColor 0.9 0 0
-              emissiveColor 0.9 0 0
-              specularColor 0.9 0 0
-            }
-          }
-          geometry Mesh {
-            url [
-              "ImageToStl_virage.obj"
-            ]
-          }
-        }
-      ]
-      name "virage_vert(33)"
       boundingObject Mesh {
         url [
           "ImageToStl_virage.obj"
@@ -1373,7 +1396,7 @@ Group {
       }
     }
     Solid {
-      translation 0.500001 -1 0.1
+      translation 0.500001 -0.96 0.1
       rotation 0 0 1 3.14159
       children [
         Shape {
@@ -1392,7 +1415,7 @@ Group {
       }
     }
     Solid {
-      translation -1 -1 0.1
+      translation -1 -0.96 0.1
       rotation 0 0 1 3.14159
       children [
         Shape {
@@ -1406,25 +1429,6 @@ Group {
         }
       ]
       name "droit_1m(24)"
-      boundingObject Box {
-        size 1 0.1 0.2
-      }
-    }
-    Solid {
-      translation 1.5 -1 0.1
-      rotation 0 0 1 3.14159
-      children [
-        Shape {
-          appearance PBRAppearance {
-            baseColor 1 0 0
-            metalness 0
-          }
-          geometry Box {
-            size 1 0.1 0.2
-          }
-        }
-      ]
-      name "droit_1m(29)"
       boundingObject Box {
         size 1 0.1 0.2
       }
@@ -1487,7 +1491,7 @@ Group {
       }
     }
     Solid {
-      translation -0.25 -1 0.1
+      translation -0.25 -0.96 0.1
       rotation 0 0 1 3.14159
       children [
         Shape {
@@ -1506,7 +1510,7 @@ Group {
       }
     }
     Solid {
-      translation -1.75 -1 0.1
+      translation -1.75 -0.96 0.1
       rotation 0 0 1 3.14159
       children [
         Shape {
@@ -1943,25 +1947,6 @@ Group {
       }
     }
     Solid {
-      translation 2.5 0 0.1
-      rotation 0 0 1 -1.5707953071795862
-      children [
-        Shape {
-          appearance PBRAppearance {
-            baseColor 1 0 0
-            metalness 0
-          }
-          geometry Box {
-            size 1 0.1 0.2
-          }
-        }
-      ]
-      name "droit_1m(36)"
-      boundingObject Box {
-        size 1 0.1 0.2
-      }
-    }
-    Solid {
       translation 2 2 0.1
       rotation 0 0 1 -1.5707953071795862
       children [
@@ -2248,51 +2233,56 @@ Solid {
   }
 }
 DEF TT02_2023b_RL TT02_2023b {
-  hidden position_0_0 0.17766459581800612
-  hidden position2_0_0 100180.83020318365
-  hidden position_0_1 0.24137803725164747
-  hidden position2_0_1 101033.9071316766
-  hidden position_0_2 97877.44100472245
-  hidden position_0_3 98828.6741615558
-  hidden linearVelocity_0 0.958177256520557 -0.09766502303811371 0.0006859322447478121
-  hidden angularVelocity_0 -0.002243375564422934 0.007569636896539704 -0.8800662901531182
-  hidden rotation_1 -0.0884597789726196 -0.9931857513359275 -0.07587444133174555 1.7304197776579997
-  hidden linearVelocity_1 1.0241772955793922 -0.21353270848614841 -0.00037545282956794225
-  hidden angularVelocity_1 4.700273648243 25.858469862790933 -1.6620497261725138
-  hidden rotation_2 0.09254805005180372 0.763103946665597 -0.639614903684239 0.37477418554492103
-  hidden linearVelocity_2 0.8919648643289245 -0.2138361496617222 -4.3816706456079795e-05
-  hidden angularVelocity_2 5.407812527125965 21.854926952689542 -1.4769626137732472
-  hidden rotation_3 0 0.9999999999999999 0 2.0197105211462296
-  hidden linearVelocity_3 1.023603148262929 0.012806935073921766 0.0013672760528145528
-  hidden angularVelocity_3 -0.3082530607291769 25.4224557568412 -1.0116211481494217
-  hidden rotation_4 0 -1 0 5.830720379096791
-  hidden linearVelocity_4 0.8914212659709894 0.01252014962881505 0.0017056724259716476
-  hidden angularVelocity_4 -0.2523451370641099 21.497542535856105 -1.0011109298816794
-  translation 2.362442649407546 4.319674299803458 0.039312772746693835
-  rotation -0.11803897164002122 -0.0160750778374519 -0.9928788410710977 0.015111582840621177
+  hidden position_0_0 -1.217530670977015e-08
+  hidden position2_0_0 122606.10169911911
+  hidden position_0_1 4.915532512713092e-08
+  hidden position2_0_1 123349.52776014236
+  hidden position_0_2 119935.5157440355
+  hidden position_0_3 120785.69534758854
+  hidden linearVelocity_0 -8.028680223585055e-05 -4.099511943239147e-05 -0.00011956740476097535
+  hidden angularVelocity_0 0.0008572821564125888 -0.00035315194737175966 0.0002562001927535219
+  hidden rotation_1 -6.0876533548850756e-09 1 -2.6995892145534375e-09 3.976385183336892
+  hidden linearVelocity_1 -8.755161396421512e-05 1.9941432314413913e-05 -2.961546070046757e-05
+  hidden angularVelocity_1 0.0032428887953615017 -0.0008767323437845859 0.00026887332291721113
+  hidden rotation_2 -2.4577662563565452e-08 -0.9999999999999997 -1.6374407650071535e-08 1.9661904072831131
+  hidden linearVelocity_2 -4.602205380936879e-05 3.865224925028599e-05 -0.00016645514548634718
+  hidden angularVelocity_2 -0.0013577983216492345 0.0001266918375258511 0.0002454385701700109
+  hidden rotation_3 0 -1 0 2.074600591549356
+  hidden linearVelocity_3 -7.288333343429682e-05 -3.795981962449362e-05 -7.151726003872304e-05
+  hidden angularVelocity_3 0.000783678925771497 -0.0003402790789119403 0.0002713013360307304
+  hidden rotation_4 0 -1 0 2.258997631832007
+  hidden linearVelocity_4 -3.747723104332832e-05 -3.6345524632402705e-05 -0.000208290313995669
+  hidden angularVelocity_4 0.0005253818918317346 -0.0002825151442483597 0.000194031434904525
+  translation 3.102878085106057 -2.835902891562493 0.03798555013875433
+  rotation 0.008294718641500125 -0.02598195503738222 -0.999627998635039 0.2146082522161608
   controller "RL_controller"
   color 0 0 0
 }
 DEF sparringpartner_car_0 sparringpartner_car_0 {
-  hidden position_0_0 -1.9803868211684356e-13
-  hidden position2_0_0 -8.915550747246438e-10
-  hidden position_0_1 1.774788653276813e-13
-  hidden position2_0_1 1.6027542209971163e-10
-  hidden position_0_2 1.130747428419035e-09
-  hidden position_0_3 -3.9947495117355835e-10
-  hidden linearVelocity_0 -1.35491981873118e-10 8.636885772839673e-11 2.151284216836594e-10
-  hidden angularVelocity_0 -1.0643351844964261e-09 -1.6514248744076487e-09 -3.869917729188799e-11
-  hidden linearVelocity_1 -1.3382488856709773e-07 1.724777811837509e-07 3.162335324082953e-10
-  hidden angularVelocity_1 6.2099606990455665e-09 1.9496803063586262e-09 -3.831819863177178e-11
-  hidden linearVelocity_2 5.484065749974505e-08 -1.7425464911733777e-07 4.707280325606647e-10
-  hidden angularVelocity_2 -8.103747966337577e-09 -3.533222141032646e-09 -3.907210616782325e-11
-  hidden linearVelocity_3 1.1827689894183622e-07 1.9565155288775002e-08 -8.385999340502203e-11
-  hidden angularVelocity_3 -7.61471356303844e-10 -4.166429634044539e-09 -3.876164370475552e-11
-  hidden linearVelocity_4 -3.955684158998192e-08 -1.761802721052351e-08 1.727344774918571e-10
-  hidden angularVelocity_4 -1.6020898878852353e-09 -8.557001186217442e-10 -3.8826035402575235e-11
-  translation 0.14946606930653103 -0.4471962693361725 0.039289782057214326
-  rotation 5.25068362003205e-05 -0.0004931850693078752 0.9999998770057521 0.21212188524702458
+  hidden position_0_0 -0.22329102006822732
+  hidden position2_0_0 34668.4071846883
+  hidden position_0_1 -0.15673185259415248
+  hidden position2_0_1 35533.37609503221
+  hidden position_0_2 35438.066249071424
+  hidden position_0_3 36650.38258997299
+  hidden linearVelocity_0 0.3410282279217677 0.36590135379601135 -0.00011314033999082653
+  hidden angularVelocity_0 -0.0005458711062903419 -0.0017578799974281433 0.4539861781304348
+  hidden rotation_1 -0.11123910334187566 0.9922166210991453 0.05596462009422114 2.2155999255442715
+  hidden linearVelocity_1 0.27573393581323 0.3876464727374776 -0.00010674543953679625
+  hidden angularVelocity_1 -9.586758953510707 6.75954652159537 1.3112421606936455
+  hidden rotation_2 0.07817878428705513 -0.9955689258139351 -0.05225506330572533 4.31590246282889
+  hidden linearVelocity_2 0.32651860142183936 0.43318261836734984 0.00011842959472479739
+  hidden angularVelocity_2 -10.635907573811792 8.626399873452058 1.5277056131869176
+  hidden rotation_3 0 -0.9999999999999999 0 0.901116578556224
+  hidden linearVelocity_3 0.35373082231801045 0.3006428670526004 -0.0003393939504541308
+  hidden angularVelocity_3 -7.388354228496938 8.4466743679246 0.506346161638478
+  hidden rotation_4 0 -1 0 5.720492112714788
+  hidden linearVelocity_4 0.40453861325124063 0.34615022052879557 -0.00011337929704616364
+  hidden angularVelocity_4 -8.744900414767946 9.991830624669172 0.5138089861549916
+  translation 2.9854844252036488 -2.309639721965416 0.03871639855474867
+  rotation 0.002599899474742141 0.0005716607420021769 0.9999964568570817 0.7466239715618985
   controller "regleur_P"
+  color 0 0.333333 0.498039
 }
 Robot {
   children [

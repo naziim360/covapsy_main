@@ -1,16 +1,14 @@
 """
-Supervisor CoVAPSy (Webots) - Race Line Formation Reset
-- Repositions RL car + sparring partners in a racing line formation
-- Randomizes car order (RL car can be first, middle, or last)
-- All cars face the same direction on the same track section
-- Maintains safe spacing between cars
-- Measures lap times using a line start/finish and sends them to the RL controller
-- Tracks lap count per episode and notifies agent after each lap
+Supervisor CoVAPSy (Webots) - Reset multi-voitures pour RL
+- Repositionne la voiture apprenante + N sparring partners après réception d'un message (collision)
+- Randomise sens de circulation + points de départ
+- Ajoute une stabilisation (20 steps)
 """
 
 import random
 import math
-from controller import Supervisor  # type: ignore
+from controller import Supervisor # type: ignore
+
 
 
 # -----------------------------
@@ -18,240 +16,196 @@ from controller import Supervisor  # type: ignore
 # -----------------------------
 PI = math.pi
 RECEIVER_SAMPLING_PERIOD = 64  # ms
-NB_SPARRING_PARTNER_CARS = 1
+NB_SPARRING_PARTNER_CARS = 0
 
-CAR_SPACING = 1.5            # metres between cars (bumper to bumper)
-LATERAL_OFFSET_RANGE = 0.15  # ±15 cm lateral jitter for realism
-
+# Choisir la piste (train/test)
 USE_TEST_TRACK = False
-
-# -----------------------------
-# Lap timer — finish line
-# -----------------------------
-# Place this segment ON the track the cars actually drive on.
-# TRAIN: cars pass through ~(0, -0.5) heading right → vertical line at x=0
-# TEST:  cars pass through ~(2.0, 5.5) heading right → vertical line at x=2
-if USE_TEST_TRACK:
-    LINE_START = (2.0, 5.0)
-    LINE_END   = (2.0, 6.0)
-else:
-    LINE_START = (0.0, -1.0)
-    LINE_END   = (0.0,  0.0)
-
 
 # -----------------------------
 # Helper functions
 # -----------------------------
+def value_clip(x: float, low: float, up: float) -> float:
+    """Clamp x to [low, up]."""
+    return low if x < low else up if x > up else x
+
 def angle_clip(a: float) -> float:
-    """Normalise angle to [-π, π] (Webots convention)."""
+    """
+    Webots rotation angle should be in [-pi, pi].
+    """
     a = a % (2 * PI)
     return a if a <= PI else a - 2 * PI
 
-def cross_2d(ax, ay, bx, by):
-    return ax * by - ay * bx
-
-def segments_intersect(p1, p2, p3, p4):
-    """Return (True, point) if segment p1→p2 crosses p3→p4, else (False, None)."""
-    d1 = (p2[0] - p1[0], p2[1] - p1[1])
-    d2 = (p4[0] - p3[0], p4[1] - p3[1])
-    denom = cross_2d(d1[0], d1[1], d2[0], d2[1])
-    if abs(denom) < 1e-10:
-        return False, None
-    diff = (p3[0] - p1[0], p3[1] - p1[1])
-    t = cross_2d(diff[0], diff[1], d2[0], d2[1]) / denom
-    u = cross_2d(diff[0], diff[1], d1[0], d1[1]) / denom
-    if 0.0 <= t <= 1.0 and 0.0 <= u <= 1.0:
-        return True, (p1[0] + t * d1[0], p1[1] + t * d1[1])
-    return False, None
-
-def get_forward(orientation):
-    """Extract world-space forward (dx, dy) from Webots 3×3 orientation matrix."""
-    return (orientation[0], orientation[3])
-
-def reset_lap_timer():
-    global lap_start_time, last_pos, lap_count
-    lap_start_time = None
-    last_pos       = None
-    lap_count      = 0
-
-
 # -----------------------------
-# Race line definitions
+# Starting positions
+# Each entry: [[x_min, x_max], [y_min, y_max], base_angle]
+# NOTE: Here we keep z constant (like your code), and randomize x,y.
 # -----------------------------
-race_lines_train = [
-    {"center": [ 0.0, -0.5], "angle": 0.00,  "direction": [1.0, 0.0], "name": "Center Straight"},
-    {"center": [-1.0, -2.5], "angle": 0.00,  "direction": [1.0, 0.0], "name": "Bottom Straight"},
-    {"center": [-4.2,  0.0], "angle": PI/2,  "direction": [0.0, 1.0], "name": "Left Vertical"},
+starting_positions_train = [
+    [ [ -1.5,  1.5],[ -0.225,  -0.78],  0.00], #centre
+    [ [ -3.74, 1.74],[ -1.84,-3.13], 0.00], #en bas
+    [ [-4.6,-3.7],[ -2.5,  2.5], PI/2], #gauche
+    [ [3.2,4.5],[ 3.18,  3.3],  PI/2] #haut droite
+]
+# starting_positions_train = [
+#     [[ 0.00,  4.00], [ 5.10,  5.30],  0.00],
+#     [[ 4.95,  5.15], [ 0.30,  4.10], -PI/2],
+#     [[ 2.70,  4.50], [-1.25, -0.75],  PI],
+#     [[ 3.20,  3.45], [ 2.00,  2.40],  PI/2],
+#     [[ 1.90,  2.70], [ 3.10,  3.30],  PI],
+#     [[ 0.00,  0.25], [-0.50,  1.50], -PI/2],
+#     [[-2.20, -1.90], [-0.50,  2.30],  PI/2],
+# ]
+
+starting_positions_test = [
+    [[ 0.60,  4.20], [ 5.40,  5.60],  0.00],
+    [[ 5.40,  5.60], [-4.30,  4.30], -PI/2],
+    [[ 1.40,  1.60], [-5.00, -4.30],  PI/2],
+    [[ 3.40,  3.60], [-2.85, -1.45],  PI/2],
+    [[ 3.40,  3.60], [ 2.20,  2.50],  PI/2],
+    [[-0.60, -0.40], [ 0.30,  0.90], -PI/2],
+    [[-3.20, -2.00], [-4.60, -4.40],  PI],
+    [[-2.60, -2.40], [-0.80,  2.30],  PI/2],
 ]
 
-race_lines_test = [
-    {"center": [ 2.0,  5.5], "angle":  0.00, "direction": [ 1.0,  0.0], "name": "Main Straight"},
-    {"center": [ 5.5,  0.0], "angle": -PI/2, "direction": [ 0.0, -1.0], "name": "Right Vertical"},
-    {"center": [ 1.5, -4.7], "angle":  PI/2, "direction": [ 0.0,  1.0], "name": "Bottom Vertical"},
-    {"center": [-0.5,  0.6], "angle": -PI/2, "direction": [ 0.0, -1.0], "name": "Left Vertical"},
-]
-
-race_lines = race_lines_test if USE_TEST_TRACK else race_lines_train
-
+starting_positions = starting_positions_test if USE_TEST_TRACK else starting_positions_train
 
 # -----------------------------
-# Supervisor init
+# Init supervisor
 # -----------------------------
-supervisor    = Supervisor()
+supervisor = Supervisor()
 basicTimeStep = int(supervisor.getBasicTimeStep())
 
+# Receiver / Emitter (must exist as devices on the Supervisor robot)
 receiver = supervisor.getDevice("receiver")
 receiver.enable(RECEIVER_SAMPLING_PERIOD)
+
 emitter = supervisor.getDevice("emitter")
 packet_number = 0
 
+# -----------------------------
+# Get nodes by DEF
+# -----------------------------
 TT02_DEF = "TT02_2023b_RL"
 tt_02 = supervisor.getFromDef(TT02_DEF)
 if tt_02 is None:
-    raise RuntimeError(f"Supervisor: DEF '{TT02_DEF}' not found in world (.wbt).")
+    raise RuntimeError(f"Supervisor: DEF '{TT02_DEF}' introuvable dans le monde (.wbt).")
 
 tt_02_translation = tt_02.getField("translation")
-tt_02_rotation    = tt_02.getField("rotation")
+tt_02_rotation = tt_02.getField("rotation")
 
+sparringpartner_car_nodes = []
 sparringpartner_car_translation_fields = []
-sparringpartner_car_rotation_fields    = []
+sparringpartner_car_rotation_fields = []
 
 for i in range(NB_SPARRING_PARTNER_CARS):
     def_name = f"sparringpartner_car_{i}"
     node = supervisor.getFromDef(def_name)
     if node is None:
-        raise RuntimeError(f"Supervisor: DEF '{def_name}' not found in world (.wbt).")
+        raise RuntimeError(f"Supervisor: DEF '{def_name}' introuvable dans le monde (.wbt).")
+    sparringpartner_car_nodes.append(node)
     sparringpartner_car_translation_fields.append(node.getField("translation"))
     sparringpartner_car_rotation_fields.append(node.getField("rotation"))
 
+# Compteur de positions aberrantes
 erreur_position = 0
-reset_count     = 0
-
-# Lap timer state
-lap_start_time = None
-last_pos       = None
-lap_count      = 0   # laps completed in the current episode
-
 
 # -----------------------------
 # Reset procedure
 # -----------------------------
-def reset_all_cars_in_line():
-    global packet_number, reset_count
+def reset_all_cars():
+    global packet_number
 
-    reset_lap_timer()   # also resets lap_count to 0
-    reset_count += 1
-    total_cars = 1 + NB_SPARRING_PARTNER_CARS
+    # Choix du sens de circulation
+    direction = random.choice([0, 1])  # 0: sens de base, 1: inverse
 
-    race_line   = random.choice(race_lines)
-    reverse     = random.choice([False, True])
-    rl_position = random.randint(0, total_cars - 1)
+    # Choisir 1 + N positions distinctes
+    indices = random.sample(range(len(starting_positions)), 1 + NB_SPARRING_PARTNER_CARS)
 
-    center_x, center_y = race_line["center"]
-    base_angle          = race_line["angle"]
-    dir_x, dir_y        = race_line["direction"]
+    # --- Place learning car ---
+    coords = starting_positions[indices[0]]
+    #print(f"[Supervisor] Chosen starting position index for learning car: {indices[0]}")
+    start_x = random.uniform(coords[0][0], coords[0][1])
+    start_y = random.uniform(coords[1][0], coords[1][1])
+    start_z = 0.04  # constant, like your code
 
-    if reverse:
-        dir_x, dir_y = -dir_x, -dir_y
-        base_angle   = angle_clip(base_angle + PI)
+    base_angle = coords[2]
+    start_angle = random.uniform(base_angle - PI/12, base_angle + PI/12)
 
-    perp_x, perp_y  = -dir_y, dir_x
-    total_length     = (total_cars - 1) * CAR_SPACING
-    first_car_offset = -total_length / 2.0
+    if direction == 1:
+        start_angle += PI  # reverse direction
+    #print(f"[Supervisor] Reset learning car to x={start_x:.2f}, y={start_y:.2f}, angle={start_angle:.2f} rad")
+    tt_02_rotation.setSFRotation([0, 0, 1, angle_clip(start_angle)])
+    tt_02_translation.setSFVec3f([start_x, start_y, start_z])
 
-    car_positions = []
-    for i in range(total_cars):
-        along   = first_car_offset + i * CAR_SPACING
-        lateral = random.uniform(-LATERAL_OFFSET_RANGE, LATERAL_OFFSET_RANGE)
-        x = center_x + dir_x * along + perp_x * lateral
-        y = center_y + dir_y * along + perp_y * lateral
-        angle = angle_clip(base_angle + random.uniform(-math.pi / 36, math.pi / 36))
-        car_positions.append({"pos": [x, y, 0.04], "angle": angle, "is_rl": (i == rl_position)})
+    #--- Place sparring partner cars ---
+    for i in range(NB_SPARRING_PARTNER_CARS):
+        coords = starting_positions[indices[i + 1]]
 
-    print(f"[Supervisor] Reset #{reset_count} | Section: {race_line['name']} | "
-          f"RL position: {rl_position + 1}/{total_cars} | "
-          f"Direction: {'REVERSE' if reverse else 'FORWARD'}")
+        sx = random.uniform(coords[0][0], coords[0][1])
+        sy = random.uniform(coords[1][0], coords[1][1])
+        sz = 0.04
 
-    rl_data = car_positions[rl_position]
-    tt_02_translation.setSFVec3f(rl_data["pos"])
-    tt_02_rotation.setSFRotation([0, 0, 1, rl_data["angle"]])
+        base_angle = coords[2]
+        ang = random.uniform(base_angle - PI/12, base_angle + PI/12)
+        if direction == 1:
+            ang += PI
 
-    sp_index = 0
-    for car_data in car_positions:
-        if not car_data["is_rl"] and sp_index < NB_SPARRING_PARTNER_CARS:
-            sparringpartner_car_translation_fields[sp_index].setSFVec3f(car_data["pos"])
-            sparringpartner_car_rotation_fields[sp_index].setSFRotation(
-                [0, 0, 1, car_data["angle"]])
-            sp_index += 1
-
+        sparringpartner_car_translation_fields[i].setSFVec3f([sx, sy, sz])
+        sparringpartner_car_rotation_fields[i].setSFRotation([0, 0, 1, angle_clip(ang)])
+    
     supervisor.simulationResetPhysics()
+    # Attente stabilisation
     for _ in range(20):
         supervisor.step(basicTimeStep)
 
+    # Ack vers l'agent
     packet_number += 1
-    emitter.send(f"voiture replacee num : {packet_number}".encode("utf-8"))
+    
 
+    msg = f"voiture replacee num : {packet_number}"
+    emitter.send(msg.encode("utf-8"))
 
 # -----------------------------
 # Main loop
 # -----------------------------
-print("[Supervisor] RACE LINE MODE - STARTED")
-print(f"[Supervisor] Total cars      : {1 + NB_SPARRING_PARTNER_CARS}")
-print(f"[Supervisor] Car spacing     : {CAR_SPACING} m")
-print(f"[Supervisor] Track           : {'TEST' if USE_TEST_TRACK else 'TRAIN'}")
-print(f"[Supervisor] Race lines      : {len(race_lines)}")
-print(f"[Supervisor] Finish line     : {LINE_START} → {LINE_END}")
+print("[Supervisor] STARTED")
+
+#last_periodic_reset_sec = -1  # mémorise la dernière seconde où on a reset
+# 1) Reset périodique toutes les 5s (1 seule fois)
+#    now_sec = int(supervisor.getTime())
+#    if now_sec % 5 == 0 and now_sec != last_periodic_reset_sec:
+#        last_periodic_reset_sec = now_sec
+#        print(f"[Supervisor] periodic reset at t={now_sec}s")
+#       reset_all_cars()
 
 while supervisor.step(basicTimeStep) != -1:
 
-    # ── Safety check ───────────────────────────────────────────────────
+    
+    # Détection positions incohérentes (sécurité)
     pos1 = tt_02_translation.getSFVec3f()
-    if abs(pos1[0]) > 20 or abs(pos1[1]) > 20 or abs(pos1[2]) > 0.1:
-        tt_02_rotation.setSFRotation([0, 0, 1, -PI / 2])
-        tt_02_translation.setSFVec3f([2.98, 2.0, 0.04])
+
+    # pos = [x, y, z]
+    if abs(pos1[0]) > 20 or abs(pos1[1]) > 20 or abs(pos1       [2]) > 0.1:
+        # Replace à un point sûr (comme ton code)
+        safe_rot = [0, 0, 1, -PI/2]
+        safe_pos = [2.98, 2, 0.04]
+        tt_02_rotation.setSFRotation(safe_rot)
+        tt_02_translation.setSFVec3f(safe_pos)
         supervisor.simulationResetPhysics()
+
         erreur_position += 1
-        print(f"[Supervisor] Aberrant position #{erreur_position}, safety reset.")
+        print(f"[Supervisor] Position aberrante détectée #{erreur_position}, repositionnement au point sûr.")
+        # petit step pour appliquer
         supervisor.step(basicTimeStep)
-        reset_lap_timer()
-        continue
 
-    # ── Lap timer ──────────────────────────────────────────────────────
-    pos         = tt_02_translation.getSFVec3f()
-    pos_2d      = (pos[0], pos[1])
-    orientation = tt_02.getOrientation()
-    heading     = get_forward(orientation)
-
-    if last_pos is not None:
-        intersect, _ = segments_intersect(last_pos, pos_2d, LINE_START, LINE_END)
-
-        if intersect:
-            move_dir = (pos_2d[0] - last_pos[0], pos_2d[1] - last_pos[1])
-            moving_forward = (move_dir[0] * heading[0] + move_dir[1] * heading[1]) > 0
-
-            if moving_forward:
-                now = supervisor.getTime()
-
-                if lap_start_time is not None:
-                    # ── Completed lap ───────────────────────────────────
-                    lap_time = now - lap_start_time
-                    lap_count += 1
-
-                    print(f"[Supervisor] Lap {lap_count} time: {lap_time:.2f}s")
-
-                    # Notify agent: lap number + time
-                    emitter.send(f"LAP {lap_count} {lap_time:.4f}".encode("utf-8"))
-
-                lap_start_time = now
-
-    last_pos = pos_2d
-
-    # ── Reset requests from RL agent ───────────────────────────────────
-    while receiver.getQueueLength() > 0:
+    # Reset signal from agent
+    if receiver.getQueueLength() > 0:
         try:
             data = receiver.getString()
             receiver.nextPacket()
-            print(f"[Supervisor] Message received: {data!r}")
-        except Exception as e:
-            print(f"[Supervisor] Reception error: {e}")
-        reset_all_cars_in_line()
+            print(f"[Supervisor] message recu: {data}")
+            
+        except Exception:
+            print("[Supervisor] souci de reception")
+        reset_all_cars()
+        
