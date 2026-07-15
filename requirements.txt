@@ -1,0 +1,23 @@
+# Core dependencies
+numpy>=1.19.0
+gymnasium>=0.27.0
+stable-baselines3>=2.0.0
+
+# Supporting libraries
+protobuf>=3.20.0
+
+# Optional but recommended
+tensorboard>=2.10.0
+optuna>=3.0.0
+matplotlib>=3.11.0
+rich>=15.0.0
+
+# Development dependencies
+pytest>=7.0.0
+black>=22.0.0
+flake8>=4.0.0
+mypy>=0.950
+
+
+
+
