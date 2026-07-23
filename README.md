@@ -1,3 +1,4 @@
+
 # CoVAPSy Autonomous Driving RL
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -7,6 +8,12 @@
 An advanced reinforcement learning framework for autonomous driving in Webots simulator, featuring PPO-based learning with domain randomization and LiDAR-based perception.
 
 ---
+
+https://github.com/user-attachments/assets/bf6f481a-c3a7-4c4e-bc97-315571583302
+
+
+
+https://github.com/user-attachments/assets/47760ec7-5a34-407f-9067-e4a1554521da
 
 ## 🎯 Features
 
