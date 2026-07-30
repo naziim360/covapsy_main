@@ -33,15 +33,11 @@ The project directory contains the training environment, supervisor tools, and s
 
 ```
 covapsy-autonomous-driving/
-├── .env                           # Local environment variables (DO NOT COMMIT)
 ├── .env.example                   # Template for environment configuration
 ├── .gitignore                     # Git exclusion file
 ├── LICENSE                        # MIT License
 ├── README.md                      # Consolidated project documentation
 ├── requirements.txt               # Python dependencies
-├── setup_webots.sh                # Linux/macOS environment setup script
-├── setup_webots_windows.bat       # Windows environment setup script
-│
 ├── Raspberry controller/          # Raspberry Pi on-vehicle control module
 │   └── Rpi_car_controller.py      # Real-car autonomous control script
 │
